@@ -30,7 +30,10 @@ public class TileController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        _tileText.text = gameObject.name;
+        if (Int32.Parse(gameObject.name) == 0)
+            _tileText.text = string.Empty;
+        else
+            _tileText.text = gameObject.name;
         switch (Int32.Parse(gameObject.name))
         {
             case 0:

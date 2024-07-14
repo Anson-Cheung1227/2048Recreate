@@ -71,5 +71,8 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+.idea/.idea.2048Recreate/.idea/discord.xml
 #TextMeshPro
 Assets/TextMesh Pro
+#LeanTween
+Assets/LeanTween

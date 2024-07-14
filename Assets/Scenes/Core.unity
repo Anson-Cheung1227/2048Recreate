@@ -414,9 +414,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50c520cb60c463d4b9ef6136ff6ba4fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gridPos: {x: -2.4, y: 1}
+  _gridPos: {x: -2.25, y: 1}
   _cellSize: 1.6
   _tilePrefab: {fileID: 4398610313485080478, guid: 71d49a885676e4041aadba7848d3a0e6, type: 3}
+  _backgroundPrefab: {fileID: 2444102590149556966, guid: f536082404e69cc439de7ea54b63bce1, type: 3}
 --- !u!4 &1378139333
 Transform:
   m_ObjectHideFlags: 0
