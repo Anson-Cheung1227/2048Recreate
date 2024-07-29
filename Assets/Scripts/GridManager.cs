@@ -9,27 +9,26 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Vector2 _gridPos;
     [SerializeField] private float _cellSize;
     [SerializeField] private GameObject _tilePrefab, _backgroundPrefab;
+    [SerializeField] private Transform _tileTransform, _backgroundTransform;
     private UnityGrid<GameObject> _grid;
 
     void Start()
     {
         EventManager.Instance.OnGameInput += MoveGrid;
+        EventManager.Instance.OnGameInput += a => AddTile();
+        EventManager.Instance.OnGameInput += a => CheckDeath();
         _grid = new UnityGrid<GameObject>(GRID_X, GRID_Y, _gridPos, _cellSize);
         for (int i = 0; i < GRID_X; ++i)
         {
             for (int e = 0; e < GRID_Y; ++e)
             {
-                GameObject tileInstance = Instantiate(_tilePrefab, this.transform);
+                GameObject tileInstance = Instantiate(_tilePrefab, _tileTransform);
                 _grid.SetValue(i, e, tileInstance);
                 tileInstance.transform.position = _grid.GetWorldPosition(i, e);
                 tileInstance.name = 0.ToString();
-                Instantiate(_backgroundPrefab, _grid.GetWorldPosition(i, e), Quaternion.identity);
+                Instantiate(_backgroundPrefab, _grid.GetWorldPosition(i, e), Quaternion.identity, _backgroundTransform);
             }
         }
-    }
-
-    private void Update()
-    {
     }
 
     /// <summary>
@@ -64,8 +63,10 @@ public class GridManager : MonoBehaviour
                         }
                         if (Int32.Parse(right.name) == Int32.Parse(current.name)) //Same value tiles
                         {
-                            right.name = (Int32.Parse(right.name) * 2).ToString();
+                            int newVal = Int32.Parse(right.name) * 2;
+                            right.name = newVal.ToString();
                             current.name = 0.ToString();
+                            AddScore(newVal);
                             AnimateMergeTile(right);
                         }
                     }
@@ -91,8 +92,10 @@ public class GridManager : MonoBehaviour
                         }
                         if (Int32.Parse(left.name) == Int32.Parse(current.name)) //Same value tiles
                         {
-                            left.name = (Int32.Parse(left.name) * 2).ToString();
+                            int newVal = Int32.Parse(left.name) * 2;
+                            left.name = newVal.ToString();
                             current.name = 0.ToString();
+                            AddScore(newVal);
                             AnimateMergeTile(left);
                         }
                     }
@@ -124,8 +127,10 @@ public class GridManager : MonoBehaviour
                         }
                         if (Int32.Parse(down.name) == Int32.Parse(current.name)) //Same value tiles
                         {
-                            down.name = (Int32.Parse(down.name) * 2).ToString();
+                            int newVal = Int32.Parse(down.name) * 2;
+                            down.name = newVal.ToString();
                             current.name = 0.ToString();
+                            AddScore(newVal);
                             AnimateMergeTile(down);
                         }
                     }
@@ -151,15 +156,16 @@ public class GridManager : MonoBehaviour
                         }
                         if (Int32.Parse(up.name) == Int32.Parse(current.name)) //Same value tiles
                         {
-                            up.name = (Int32.Parse(up.name) * 2).ToString();
+                            int newVal = Int32.Parse(up.name) * 2;
+                            up.name = newVal.ToString();
                             current.name = 0.ToString();
+                            AddScore(newVal);
                             AnimateMergeTile(up);
                         }
                     }
                 }
             }
         }
-        AddTile();
     }
 
     private List<GameObject> GetEmptyTiles(UnityGrid<GameObject> grid)
@@ -180,6 +186,16 @@ public class GridManager : MonoBehaviour
         return list;
     }
 
+    private void AddScore(int score)
+    {
+        GameManager.Instance.AddScore(score);
+    }
+
+    private void AnimateMoveTile(GameObject tile, Vector2 pos)
+    {
+        LeanTween.move(tile, pos, 0.3f);
+    }
+
     private void AnimateMergeTile(GameObject tile)
     {
         LTSeq sequence = LeanTween.sequence();
@@ -189,16 +205,51 @@ public class GridManager : MonoBehaviour
     private void AddTile()
     {
         List<GameObject> empty = GetEmptyTiles(_grid);
-        if (empty.Count == 0)
-        {
-            //death
-        }
-        else
+        if (empty.Count != 0)
         {
             GameObject picked = empty[Random.Range(0, empty.Count - 1)];
-            picked.name = 2.ToString();
+            picked.name = (Random.Range(0, 2) == 0 ? 2 : 4).ToString();
             picked.transform.localScale = new Vector3(0, 0, 0);
             LeanTween.scale(picked, new Vector3(1.5f, 1.5f, 1.5f), 0.3f);
+        }
+    }
+
+    private void CheckDeath()
+    {
+        List<GameObject> empty = GetEmptyTiles(_grid);
+        if (empty.Count == 0) //Grid full
+        {
+            for (int x = 0; x < GRID_X; ++x)
+            {
+                for (int y = 0; y < GRID_Y; ++y)
+                {
+                    GameObject target = _grid.GetValue(x, y);
+                    if (y - 1 > 0)
+                    {
+                        GameObject up = _grid.GetValue(x, y - 1);
+                        if (up.name == target.name) return;
+                    }
+
+                    if (y + 1 < GRID_Y)
+                    {
+                        GameObject down = _grid.GetValue(x, y + 1);
+                        if (down.name == target.name) return;
+                    }
+
+                    if (x - 1 > 0)
+                    {
+                        GameObject left = _grid.GetValue(x - 1, y);
+                        if (left.name == target.name) return;
+                    }
+
+                    if (x + 1 < GRID_X)
+                    {
+                        GameObject right = _grid.GetValue(x + 1, y);
+                        if (right.name == target.name) return;
+                    }
+                }
+            }
+            GameManager.Instance.DeathState();
         }
     }
 }

@@ -1,12 +1,13 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EventManager : MonoBehaviour
 {
     public static EventManager Instance;
+    public event Action<int> OnScoreChanged;
+    public event Action<int> OnUpdateHighScoreUI;
     public event Action<Vector2> OnGameInput;
+    
 
     private void Awake()
     {
@@ -28,5 +29,13 @@ public class EventManager : MonoBehaviour
     public void InvokeOnGameInput(Vector2 direction)
     {
         OnGameInput?.Invoke(direction);
+    }
+    public void InvokeOnScoreChanged(int score)
+    {
+        OnScoreChanged?.Invoke(score);
+    }
+    public void InvokeOnUpdateHighScoreUI(int score)
+    {
+        OnUpdateHighScoreUI?.Invoke(score);
     }
 }
